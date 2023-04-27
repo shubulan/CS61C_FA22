@@ -1,3 +1,6 @@
 [submodule "fa22-lab-starter"]
 	path = fa22-lab-starter
 	url = https://github.com/shubulan/fa22-lab-starter.git
+[submodule "fa22-proj1-starter"]
+	path = fa22-proj1-starter
+	url = https://github.com/shubulan/fa22-proj1-starter.git
