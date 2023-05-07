@@ -6,3 +6,7 @@
 	path = fa22-proj1-starter
 	url = https://github.com/shubulan/fa22-proj1-starter.git
 	branch = proj1/shubulan
+[submodule "fa22-proj2-starter"]
+	path = fa22-proj2-starter
+	url = https://github.com/shubulan/fa22-proj2-starter.git
+	branch = dev/shubulan
