@@ -60,10 +60,11 @@ c):
 d):
 
 ~~总是不正确~~
-有时不正确。因为我们没有索引数组，所以对`arr++`会有数据竞争。
+有时不正确。因为我们没有索引数组，所以对 `arr++` 会有数据竞争。只要 *arr = i 和 arr++ 两句没有被打散，就不会有问题。
 
 3.2 下面代码有什么潜在问题？
 
+不同的线程修改同一个 memory block 的内容，会造成假共享问题。因为线程会在他们的缓存中存一个错误的值，当其他线程修改了同一块缓存。这会拖慢运行速度，因为频繁的造成缓存一致性 miss
 
 ## 4 一致性
 多线程编程的优势，只有在你理解了一致性之后才能获得。有两个最常见的一致性问题：
@@ -71,29 +72,30 @@ d):
     2. 读-修改-写：这是最常见的编程模式。在多线程编程中，读、修改、写三个阶段的插入总是会造成各种各样的问题
 
 
-### 4.1 MOESI 协议
-并行处理允许CPU的各个内核作为独立单元运行，并有自己的缓存。然而，要做到这一点，机器必须能够协调所有内核和所有缓存的信息流，使这些信息在某种程度上是可靠的。因此，我们强加了缓存状态，由 valid有效位、dirty 脏位和 shared 共享位组成，以表示特定缓存块的缓存数据的状态。这些缓存状态是在某一核心的缓存发生缺失或写入时使用的，这样，如果一个地方的信息被修改，其他的缓存也会被告知。总之，我们不希望两个有不同数据的缓存都说自己有最新的数据，因为这根本不可能是真的。换句话说，从主处理器的角度来看，它们的缓存行状态可能会因为代理处理器执行的动作而被更新。
+### 4.1 MOESI 协议 ****** 暂时不准备搞懂
+并行处理允许CPU的各个内核作为独立单元运行，并有自己的缓存。然而，要做到这一点，机器必须能够协调所有内核和所有缓存的信息流，使这些信息在某种程度上是可靠的。因此，我们强加了缓存状态，由 valid有效位、dirty 脏位和 shared 共享位组成，以表示特定缓存块的缓存数据的状态。这些缓存状态是在 cpu 某一核的缓存发生 miss 或 write 时使用的，这样，如果一个地方的信息被修改，其他的缓存也会被通知。总之，我们不希望两个有不同数据的缓存都说自己有最新的数据，因为这根本不可能是真的。换句话说，从主处理器的角度来看，它们的缓存行状态可能会因为代理处理器执行的动作而被更新。
 
-4.1 将下面所有的状态和对应的状态关联
-(a) data in host cache up-to-date
+4.1 将下面所有的条件和对应的状态关联
+(a) data in host cache up-to-date 主缓存更新
 
-(b) data in main memory is outdated
 
-(c) data in main memory up-to-date
+(b) data in main memory is outdated 主内存数据落伍
 
-(d) if evicted, host cache must write this line’s data back to main memory
+(c) data in main memory up-to-date 主内存更新
 
-(e) no copies exist in other (proxy) caches
+(d) if evicted, host cache must write this line’s data back to main memory 缓存evicted 主缓存把这行缓存写入主存
 
-(f) copies may exist in other (proxy) caches
+(e) no copies exist in other (proxy) caches 其他缓存中没有副本
 
-(g) access from processor will result in a miss
+(f) copies may exist in other (proxy) caches 其他缓存中可能存在副本
 
-1. Modified 
-2. Owned
-3. Exclusive
-4. Shared
-5. Invalid
+(g) access from processor will result in a miss 处理器访问会导致 miss
+
+1. Modified  a b d e
+2. Owned a b d f
+3. Exclusive a c e 
+4. Shared a f
+5. Invalid f g
 
 ## 4.2 原子指令
 为了解决 RMW 问题，我们得依赖不可打断的执行操作，也就是说 原子操作。
@@ -110,4 +112,8 @@ Test-and-set
 
 4.3 为什么需要在并行化的实现中使用原子指令？
 
+如果不使用原子操作，在多个线程写全局的 sum 时，会发生数据竞争
+
 4.4 在上述程序的哪两行之间 线程开始并行化执行代码？
+
+5 6 两行之间。
