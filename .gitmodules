@@ -14,3 +14,7 @@
 	path = fa22-proj3-starter
 	url = git@github.com:shubulan/fa22-proj3-starter.git
 	branch = dev/shubulan
+[submodule "fa22-proj4-starter"]
+	path = fa22-proj4-starter
+	url = git@github.com:shubulan/fa22-proj4-starter.git
+	branch = dev/shubulan
